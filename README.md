@@ -33,8 +33,8 @@ After building sys-info-node, you can explore its exports at the Node REPL:
 ```sh
 $ npm install
 $ node
-> require('.').hello()
-"hello node"
+> require('.').loadAvg()
+{ one: 0.07, five: 0.1, fifteen: 0.09 }
 ```
 
 ## Available Scripts
