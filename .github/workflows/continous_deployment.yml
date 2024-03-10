@@ -12,41 +12,47 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
+          # Linux targets
           - os: ubuntu-latest
-            rust-target:
-              [
-                x86_64-unknown-linux-gnu,
-                i686-unknown-linux-gnu,
-                aarch64-unknown-linux-gnu,
-                armv7-unknown-linux-gnueabihf,
-                s390x-unknown-linux-gnu,
-                powerpc64le-unknown-linux-gnu,
-              ]
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: i686-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+          - os: ubuntu-latest
+            target: s390x-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: powerpc64le-unknown-linux-gnu
+          # Windows targets
           - os: windows-latest
-            rust-target: [x86_64-pc-windows-msvc, i686-pc-windows-msvc]
+            target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            target: i686-pc-windows-msvc
+          # macOS targets
           - os: macos-latest
-            rust-target: [x86_64-apple-darwin, aarch64-apple-darwin]
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: ${{ matrix.rust-target }}
+          target: ${{ matrix.target }}
           override: true
       - name: Build and Copy Artifact
         run: |
-          for target in ${{ toJson(matrix.rust-target) }}; do
-            echo "Building for $target"
-            rustup target add $target
-            cargo build --target $target --message-format=json-render-diagnostics
-            cargo-cp-artifact -nc index.node -- cargo build --target $target --message-format=json-render-diagnostics
-          done
-      - name: Upload Artifacts
+          cargo build --target ${{ matrix.target }} --message-format=json-render-diagnostics
+          cargo-cp-artifact -nc index.node -- cargo build --target ${{ matrix.target }} --message-format=json-render-diagnostics
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}-artifacts
-          path: |
-            target/**/*.node
+          name: ${{ matrix.os }}-${{ matrix.target }}-artifact
+          path: target/${{ matrix.target }}/debug/index.node
