@@ -3,6 +3,7 @@ use neon::prelude::*;
 mod cpu;
 mod load_avg;
 mod disk;
+mod mem;
 
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
@@ -21,6 +22,11 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("diskAvailableSpace", disk::available_space)?;
     cx.export_function("diskTotalSpace", disk::total_space)?;
     cx.export_function("diskIsRemovable", disk::is_removable)?;
+
+    cx.export_function("availableMemory", mem::available_memory)?;
+    cx.export_function("freeMemory", mem::free_memory)?;
+    cx.export_function("totalMemory", mem::total_memory)?;
+    cx.export_function("usedMemory", mem::used_memory)?;
 
     Ok(())
 }
